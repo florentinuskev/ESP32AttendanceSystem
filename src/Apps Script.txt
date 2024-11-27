@@ -1,0 +1,43 @@
+// ESP32 Attendance System with Google Sheets and LCD Display
+
+let ss = SpreadsheetApp.openById('Sheet ID Here'); // Enter your googlesheets URL ID here
+let sheet = ss.getSheetByName('Attendance'); // Set your sheet name!
+let timezone = "Asia/Jakarta"; //Set your timezone
+
+
+let doGet = (e) => {
+  Logger.log( JSON.stringify(e) );
+  //----------------------------------------------------------------------------------
+  // ESP32 send data to this code block
+  //----------------------------------------------------------------------------------
+
+  // Get data from parameters sended by ESP32
+  if (e.parameter == 'undefined') {
+    return ContentService.createTextOutput("Received data is undefined");
+  }
+
+  //----------------------------------------------------------------------------------
+  let currDate = new Date();
+  let currTime = Utilities.formatDate(currDate, timezone, 'HH:mm:ss');
+  let name = stripQuotes(e.parameters.name);
+  //Logger.log('name=' + name);
+
+  //----------------------------------------------------------------------------------
+  // Add new row to spreadsheet
+  let nextRow = sheet.getLastRow() + 1;
+  sheet.getRange("A" + nextRow).setValue(currDate);
+  sheet.getRange("B" + nextRow).setValue(currTime);
+  sheet.getRange("C" + nextRow).setValue(name);
+  //----------------------------------------------------------------------------------
+
+  //returns response back to ESP32
+  return ContentService.createTextOutput("Card holder name is stored in column C");
+  //----------------------------------------------------------------------------------
+}
+
+//----------------------------------------------------------------------------------
+// Helper Functions
+//----------------------------------------------------------------------------------
+let stripQuotes = (value) => {
+  return value.toString().replace(/^["']|['"]$/g, "");
+}
